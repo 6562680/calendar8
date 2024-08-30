@@ -1,0 +1,32 @@
+{
+  "name": "gzhegow/calendar",
+  "type": "library",
+
+  "authors": [
+    {
+      "name": "gzhegow",
+      "email": "6562680@gmail.com"
+    }
+  ],
+
+  "require": {
+    "php": "^8.0",
+
+    "ext-json": "*"
+  },
+
+  "autoload": {
+    "psr-4": {
+      "Gzhegow\\Calendar\\": "src/"
+    }
+  },
+
+  "minimum-stability": "dev",
+  "prefer-stable": true,
+
+  "config": {
+    "optimize-autoloader": true,
+
+    "sort-packages": false
+  }
+}
