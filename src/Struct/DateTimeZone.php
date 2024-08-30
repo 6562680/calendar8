@@ -29,7 +29,7 @@ class DateTimeZone extends \DateTimeZone implements
     }
 
 
-    public function jsonSerialize() // : mixed
+    public function jsonSerialize() : mixed
     {
         // var_dump($tz, $var = json_encode($tz));
         //
