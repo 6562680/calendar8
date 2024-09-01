@@ -17,7 +17,12 @@ class DateInterval extends \DateInterval implements
             return clone $object;
         }
 
-        Lib::assert_true('is_a', [ $object, \DateInterval::class ]);
+        if (! is_a($object, \DateInterval::class)) {
+            throw new \LogicException('The `object` should be instance of: '
+                . \DateInterval::class
+                . ' / ' . Lib::php_dump($object)
+            );
+        }
 
         (function ($state) {
             foreach ( $state as $key => $value ) {
@@ -33,15 +38,19 @@ class DateInterval extends \DateInterval implements
      */
     public static function createFromDateString($datetime)
     {
-        Lib::assert([ Lib::class, 'filter_string' ], [ $datetime ]);
+        if (null === Lib::parse_astring($datetime)) {
+            throw  new \LogicException(
+                'The `datetime` should be a non-empty string: ' . Lib::php_dump($datetime)
+            );
+        }
 
-        $object = parent::createFromDateString($datetime);
+        $dti = parent::createFromDateString($datetime);
 
         (function ($state) {
             foreach ( $state as $key => $value ) {
                 $this->{$key} = $value;
             }
-        })->call($interval = new static('P0D'), (array) $object);
+        })->call($interval = new static('P0D'), (array) $dti);
 
         return $interval;
     }
@@ -49,32 +58,10 @@ class DateInterval extends \DateInterval implements
 
     public function jsonSerialize() : mixed
     {
-        // $dt = new \DateInterval();
-        // var_dump($dt, $var = json_encode($dt), json_decode($var));
+        // $dti = new \DateInterval();
+        // var_dump($dti, $var = json_encode($dti));
         //
         // > string(88) "{"y":0,"m":0,"d":0,"h":0,"i":10,"s":0,"f":0,"invert":0,"days":false,"from_string":false}"
-        // > object(stdClass)#2 (10) {
-        // >   ["y"]=>
-        // >   int(0)
-        // >   ["m"]=>
-        // >   int(0)
-        // >   ["d"]=>
-        // >   int(0)
-        // >   ["h"]=>
-        // >   int(0)
-        // >   ["i"]=>
-        // >   int(10)
-        // >   ["s"]=>
-        // >   int(0)
-        // >   ["f"]=>
-        // >   int(0)
-        // >   ["invert"]=>
-        // >   int(0)
-        // >   ["days"]=>
-        // >   bool(false)
-        // >   ["from_string"]=>
-        // >   bool(false)
-        // > }
         //
         // vs
         //

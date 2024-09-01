@@ -17,7 +17,12 @@ class DateTimeZone extends \DateTimeZone implements
             return clone $object;
         }
 
-        Lib::assert_true('is_a', [ $object, \DateTimeZone::class ]);
+        if (! is_a($object, \DateTimeZone::class)) {
+            throw new \LogicException('The `object` should be instance of: '
+                . \DateTimeZone::class
+                . ' / ' . Lib::php_dump($object)
+            );
+        }
 
         (function ($state) {
             foreach ( $state as $key => $value ) {
@@ -34,12 +39,6 @@ class DateTimeZone extends \DateTimeZone implements
         // var_dump($tz, $var = json_encode($tz));
         //
         // > string(72) "{"timezone_type":3,"timezone":"UTC"}"
-        // > object(stdClass)#2 (3) {
-        // >   ["timezone_type"]=>
-        // >   int(3)
-        // >   ["timezone"]=>
-        // >   string(3) "UTC"
-        // > }
         //
         // vs
         //

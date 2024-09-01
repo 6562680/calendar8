@@ -9,30 +9,43 @@ class Lib
      */
     public static function php_dump($value, int $maxlen = null) : string
     {
-        if (is_string($value)) {
-            $_value = ''
-                . '{ '
-                . 'string(' . strlen($value) . ')'
-                . ' "'
-                . ($maxlen
-                    ? (substr($value, 0, $maxlen) . '...')
-                    : $value
-                )
-                . '"'
-                . ' }';
+        if (! is_iterable($value)) {
+            if (is_object($value)) {
+                if (! method_exists($value, '__debugInfo')) {
+                    $_value = '{ object(' . get_class($value) . ' # ' . spl_object_id($value) . ') }';
 
-        } elseif (! is_iterable($value)) {
-            $_value = null
-                ?? (($value === null) ? '{ NULL }' : null)
-                ?? (($value === false) ? '{ FALSE }' : null)
-                ?? (($value === true) ? '{ TRUE }' : null)
-                ?? (is_object($value) ? ('{ object(' . get_class($value) . ' # ' . spl_object_id($value) . ') }') : null)
-                ?? (is_resource($value) ? ('{ resource(' . gettype($value) . ' # ' . ((int) $value) . ') }') : null)
-                //
-                ?? (is_int($value) ? (var_export($value, 1)) : null) // INF
-                ?? (is_float($value) ? (var_export($value, 1)) : null) // NAN
-                //
-                ?? null;
+                } else {
+                    ob_start();
+                    var_dump($value);
+                    $_value = ob_get_clean();
+
+                    $_value = '{ object(' . get_class($value) . ' # ' . spl_object_id($value) . '): ' . $_value . ' }';
+                }
+
+            } elseif (is_string($value)) {
+                $_value = ''
+                    . '{ '
+                    . 'string(' . strlen($value) . ')'
+                    . ' "'
+                    . ($maxlen
+                        ? (substr($value, 0, $maxlen) . '...')
+                        : $value
+                    )
+                    . '"'
+                    . ' }';
+
+            } else {
+                $_value = null
+                    ?? (($value === null) ? '{ NULL }' : null)
+                    ?? (($value === false) ? '{ FALSE }' : null)
+                    ?? (($value === true) ? '{ TRUE }' : null)
+                    ?? (is_resource($value) ? ('{ resource(' . gettype($value) . ' # ' . ((int) $value) . ') }') : null)
+                    //
+                    ?? (is_int($value) ? (var_export($value, 1)) : null) // INF
+                    ?? (is_float($value) ? (var_export($value, 1)) : null) // NAN
+                    //
+                    ?? null;
+            }
 
         } else {
             $_value = [];
@@ -56,9 +69,7 @@ class Lib
         }
 
         if (null === $_value) {
-            throw static::php_throwable(
-                'Unable to dump variable'
-            );
+            throw static::php_throwable([ 'Unable to ' . __FUNCTION__ . '()', 'var' => $value ]);
         }
 
         return $_value;
@@ -262,7 +273,7 @@ class Lib
     }
 
 
-    public static function filter_int($value) : ?int
+    public static function parse_int($value) : ?int
     {
         if (is_int($value)) {
             return $value;
@@ -277,7 +288,7 @@ class Lib
         $valueOriginal = $value;
 
         if (! is_scalar($valueOriginal)) {
-            if (null === ($_valueOriginal = static::filter_str($valueOriginal))) {
+            if (null === ($_valueOriginal = static::parse_string($valueOriginal))) {
                 return null;
             }
 
@@ -302,7 +313,7 @@ class Lib
         return null;
     }
 
-    public static function filter_num($value) // : ?int|float
+    public static function parse_num($value) // : ?int|float
     {
         if (is_int($value)) {
             return $value;
@@ -326,7 +337,7 @@ class Lib
         $valueOriginal = $value;
 
         if (! is_scalar($valueOriginal)) {
-            if (null === ($_valueOriginal = static::filter_str($valueOriginal))) {
+            if (null === ($_valueOriginal = static::parse_string($valueOriginal))) {
                 return null;
             }
 
@@ -358,7 +369,8 @@ class Lib
         return null;
     }
 
-    public static function filter_str($value) : ?string
+
+    public static function parse_string($value) : ?string
     {
         if (is_string($value)) {
             return $value;
@@ -392,49 +404,13 @@ class Lib
         return null;
     }
 
-    public static function filter_string($value) : ?string
+    public static function parse_astring($value) : ?string
     {
-        if (null === ($_value = static::filter_str($value))) {
+        if (null === ($_value = static::parse_string($value))) {
             return null;
         }
 
         if ('' === $_value) {
-            return null;
-        }
-
-        return $_value;
-    }
-
-    public static function filter_trim($value) : ?string
-    {
-        if (null === ($_value = static::filter_str($value))) {
-            return null;
-        }
-
-        $_value = trim($_value);
-
-        if ('' === $_value) {
-            return null;
-        }
-
-        return $_value;
-    }
-
-    public static function filter_word($value) : ?string
-    {
-        if (null === ($_value = static::filter_trim($value))) {
-            return null;
-        }
-
-        if (false !== strpos($_value, ' ')) {
-            return null;
-        }
-
-        if (false === preg_match('/[^\p{L}\d_]/u', $_value, $m)) {
-            return null;
-        }
-
-        if ($m) {
             return null;
         }
 

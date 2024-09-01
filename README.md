@@ -62,6 +62,9 @@ set_exception_handler(function ($e) {
 // > создаем календарь
 $calendar = new Calendar();
 
+// > можно изменить классы дат на свои собственные реализации
+// \Gzhegow\Calendar\Type::setInstance(new \Gzhegow\Calendar\Type());
+
 // > создаем дату
 $tests[ '_calendar_date' ] = $calendar->parseDateTime($datetime = 'now', $formats = null, $timezoneIfParsed = null);
 Lib::assert_true('is_a', [ $tests[ '_calendar_date' ], DateTime::class ]);
